@@ -28,8 +28,9 @@ app.get("/app/", (req, res, next) => {
 app.post("/app/new/", (req, res) => {	
 	let user = req.body.user
 	let pass = md5(req.body.pass)
-	const stmt = db.prepare(`insert into userinfo (user, pass) values (${user}, ${pass})`).run();
-	res.status(200).json(stmt);
+	const stmt = db.prepare(`INSERT INTO userinfo (user, pass) VALUES (?, ?)`).run(user, pass);
+	res.json({"message": `${stmt["changes"]} record created: ID ${stmt["lastInsertRowid"]} (201)`})
+	res.status(200);
 });
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
 app.get("/app/users/", (req, res) => {	
@@ -45,17 +46,22 @@ app.get("/app/user/:id", (req, res) => {
 });
 // UPDATE a single user (HTTP method PATCH) at endpoint /app/update/user/:id
 app.patch("/app/update/user/:id", (req, res) => {	
-	var id = req.params.id;
-	var user = req.body.user
-	var pass = md5(req.body.pass)
-	const stmt = db.prepare(`update userinfo set user = coalesce(${user}, user), pass = coalesce(${pass}, pass) where id = ${id}`).run();
-	res.status(200).json(stmt);
+	let id = req.params.id;
+	let user = req.body.user
+	let pass = md5(req.body.pass)
+	const stmt = db.prepare(`update userinfo set user = coalesce(?, user), pass = coalesce(?, pass) where id = ?`).run(user, pass, id);
+	res.status(200)
+
+	res.json({"message": `${stmt["changes"]} record updated: ID ${id} (200)`})
+
 });
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.delete("/app/delete/user/:id", (req, res) => {	
 	let id = req.params.id;
-	const stmt = db.prepare(`delete from userinfo where id = ${id}`).run();
-	res.status(200).json(stmt);
+	const stmt = db.prepare("DELETE FROM userinfo WHERE id = ?").run(id);
+	res.json({"message": `${stmt["changes"]} record deleted: ID ${id} (200)`})
+
+	res.status(200);
 });
 // Default response for any other request
 app.use(function(req, res){
