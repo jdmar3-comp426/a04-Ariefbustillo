@@ -28,7 +28,7 @@ app.get("/app/", (req, res, next) => {
 app.get("/app/new", (req, res) => {	
 	let user = req.body.user
 	let pass = md5(req.body.pass)
-	const stmt = db.prepare(`insert into userinfo (user, pass) values (${user}, ${pass})`).all();
+	const stmt = db.prepare(`insert into userinfo (user, pass) values (${user}, ${pass})`).run();
 	res.status(200).json(stmt);
 });
 // READ a list of all users (HTTP method GET) at endpoint /app/users/
@@ -48,13 +48,13 @@ app.get("/app/update/user/:id", (req, res) => {
 	var id = req.params.id;
 	var user = req.body.user
 	var pass = md5(req.body.pass)
-	const stmt = db.prepare(`update userinfo set user = coalesce(${user}, user), pass = coalesce(${pass}, pass) where id = ${id}`).all();
+	const stmt = db.prepare(`update userinfo set user = coalesce(${user}, user), pass = coalesce(${pass}, pass) where id = ${id}`).run();
 	res.status(200).json(stmt);
 });
 // DELETE a single user (HTTP method DELETE) at endpoint /app/delete/user/:id
 app.get("/app/delete/user/:id", (req, res) => {	
 	let id = req.params.id;
-	const stmt = db.prepare(`delete from userinfo where id = ${id}`).all();
+	const stmt = db.prepare(`delete from userinfo where id = ${id}`).run();
 	res.status(200).json(stmt);
 });
 // Default response for any other request
